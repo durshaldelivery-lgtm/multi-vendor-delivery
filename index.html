@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuickDeliver - Multi-Vendor Food Delivery</title>
+    <meta name="description" content="Order from your favorite local restaurants and get it delivered fast">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <h1 class="text-2xl font-bold text-green-600">QuickDeliver</h1>
+                </div>
+                
+                <div class="flex-1 max-w-2xl mx-8">
+                    <div class="relative">
+                        <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                        <input
+                            type="text"
+                            id="searchInput"
+                            placeholder="Search for food, restaurants, or items..."
+                            class="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                        />
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-4">
+                    <button class="flex items-center px-3 py-2 text-gray-700 hover:text-green-600">
+                        <i class="fas fa-map-marker-alt mr-2"></i>
+                        Location
+                    </button>
+                    <button onclick="showVendorPortal()" class="flex items-center px-3 py-2 text-gray-700 hover:text-green-600">
+                        <i class="fas fa-store mr-2"></i>
+                        Vendor Portal
+                    </button>
+                    <button onclick="showSignIn()" class="flex items-center px-3 py-2 text-gray-700 hover:text-green-600">
+                        <i class="fas fa-user mr-2"></i>
+                        Sign In
+                    </button>
+                    <button onclick="showCart()" class="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                        <i class="fas fa-shopping-cart mr-2"></i>
+                        Cart <span id="cartCount" class="ml-1 bg-white text-green-600 rounded-full px-2 py-1 text-xs">0</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main id="mainContent">
+        <!-- Hero Section -->
+        <section class="bg-gradient-to-r from-green-600 to-green-500 text-white py-16">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center">
+                    <h2 class="text-4xl md:text-5xl font-bold mb-4">
+                        Food Delivery at Your Doorstep
+                    </h2>
+                    <p class="text-xl mb-8">
+                        Order from your favorite local restaurants and get it delivered fast
+                    </p>
+                    <div class="flex justify-center space-x-4">
+                        <button onclick="showRestaurants()" class="px-6 py-3 bg-white text-green-600 rounded-lg hover:bg-gray-100 font-semibold">
+                            Order Now
+                            <i class="fas fa-arrow-right ml-2"></i>
+                        </button>
+                        <button onclick="showVendorSignup()" class="px-6 py-3 border border-white text-white rounded-lg hover:bg-white hover:text-green-600 font-semibold">
+                            Become a Partner
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Categories -->
+        <section class="py-12 bg-white">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <h3 class="text-2xl font-bold mb-8">Shop by Category</h3>
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                    <div onclick="filterByCategory('fast-food')" class="cursor-pointer hover:shadow-lg transition-shadow rounded-lg p-6 text-center border border-gray-200">
+                        <div class="w-16 h-16 mx-auto mb-3 rounded-full bg-orange-100 flex items-center justify-center">
+                            <i class="fas fa-utensils text-orange-600 text-2xl"></i>
+                        </div>
+                        <p class="font-medium">Fast Food</p>
+                    </div>
+                    <div onclick="filterByCategory('pizza')" class="cursor-pointer hover:shadow-lg transition-shadow rounded-lg p-6 text-center border border-gray-200">
+                        <div class="w-16 h-16 mx-auto mb-3 rounded-full bg-red-100 flex items-center justify-center">
+                            <i class="fas fa-pizza-slice text-red-600 text-2xl"></i>
+                        </div>
+                        <p class="font-medium">Pizza</p>
+                    </div>
+                    <div onclick="filterByCategory('asian')" class="cursor-pointer hover:shadow-lg transition-shadow rounded-lg p-6 text-center border border-gray-200">
+                        <div class="w-16 h-16 mx-auto mb-3 rounded-full bg-green-100 flex items-center justify-center">
+                            <i class="fas fa-utensils text-green-600 text-2xl"></i>
+                        </div>
+                        <p class="font-medium">Asian</p>
+                    </div>
+                    <div onclick="filterByCategory('healthy')" class="cursor-pointer hover:shadow-lg transition-shadow rounded-lg p-6 text-center border border-gray-200">
+                        <div class="w-16 h-16 mx-auto mb-3 rounded-full bg-blue-100 flex items-center justify-center">
+                            <i class="fas fa-salad text-blue-600 text-2xl"></i>
+                        </div>
+                        <p class="font-medium">Healthy</p>
+                    </div>
+                    <div onclick="filterByCategory('desserts')" class="cursor-pointer hover:shadow-lg transition-shadow rounded-lg p-6 text-center border border-gray-200">
+                        <div class="w-16 h-16 mx-auto mb-3 rounded-full bg-pink-100 flex items-center justify-center">
+                            <i class="fas fa-ice-cream text-pink-600 text-2xl"></i>
+                        </div>
+                        <p class="font-medium">Desserts</p>
+                    </div>
+                    <div onclick="filterByCategory('beverages')" class="cursor-pointer hover:shadow-lg transition-shadow rounded-lg p-6 text-center border border-gray-200">
+                        <div class="w-16 h-16 mx-auto mb-3 rounded-full bg-purple-100 flex items-center justify-center">
+                            <i class="fas fa-coffee text-purple-600 text-2xl"></i>
+                        </div>
+                        <p class="font-medium">Beverages</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Featured Vendors -->
+        <section class="py-12">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center mb-8">
+                    <h3 class="text-2xl font-bold">Featured Restaurants</h3>
+                    <button onclick="showAllRestaurants()" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">View All</button>
+                </div>
+                <div id="restaurantGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <!-- Restaurants will be dynamically inserted here -->
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Shopping Cart Modal -->
+    <div id="cartModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
+        <div class="flex items-center justify-center h-full">
+            <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold">Shopping Cart</h3>
+                    <button onclick="hideCart()" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div id="cartItems" class="space-y-2">
+                    <!-- Cart items will be dynamically inserted here -->
+                </div>
+                <div class="border-t pt-4 mt-4">
+                    <div class="flex justify-between items-center">
+                        <span class="font-semibold">Total:</span>
+                        <span id="cartTotal" class="text-xl font-bold text-green-600">$0.00</span>
+                    </div>
+                    <button onclick="checkout()" class="w-full mt-4 bg-green-600 text-white py-2 rounded-lg hover:bg-green-700">
+                        Checkout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <h3 class="text-xl font-bold mb-4">QuickDeliver</h3>
+                <p class="text-gray-400 mb-8">Your favorite food, delivered fast.</p>
+                <div class="border-t border-gray-800 pt-8 text-gray-400">
+                    <p>&copy; 2024 QuickDeliver. All rights reserved.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Restaurant data
+        const restaurants = [
+            { id: 1, name: 'Burger Palace', category: 'fast-food', cuisine: 'American', rating: 4.8, deliveryTime: '25-35 min', price: '$$', image: 'https://via.placeholder.com/300x200/FF6B6B/FFFFFF?text=Burger+Palace' },
+            { id: 2, name: 'Pizza Express', category: 'pizza', cuisine: 'Italian', rating: 4.6, deliveryTime: '30-40 min', price: '$$', image: 'https://via.placeholder.com/300x200/4ECDC4/FFFFFF?text=Pizza+Express' },
+            { id: 3, name: 'Sushi Master', category: 'asian', cuisine: 'Japanese', rating: 4.9, deliveryTime: '35-45 min', price: '$$$', image: 'https://via.placeholder.com/300x200/45B7D1/FFFFFF?text=Sushi+Master' },
+            { id: 4, name: 'Taco Fiesta', category: 'mexican', cuisine: 'Mexican', rating: 4.7, deliveryTime: '20-30 min', price: '$', image: 'https://via.placeholder.com/300x200/F39C12/FFFFFF?text=Taco+Fiesta' },
+            { id: 5, name: 'Green Salad', category: 'healthy', cuisine: 'Healthy', rating: 4.5, deliveryTime: '15-25 min', price: '$', image: 'https://via.placeholder.com/300x200/27AE60/FFFFFF?text=Green+Salad' },
+            { id: 6, name: 'Sweet Dreams', category: 'desserts', cuisine: 'Desserts', rating: 4.8, deliveryTime: '20-30 min', price: '$$', image: 'https://via.placeholder.com/300x200/E91E63/FFFFFF?text=Sweet+Dreams' }
+        ];
+
+        // Shopping cart
+        let cart = [];
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            displayRestaurants(restaurants);
+            setupSearch();
+        });
+
+        // Display restaurants
+        function displayRestaurants(restaurantList) {
+            const grid = document.getElementById('restaurantGrid');
+            grid.innerHTML = restaurantList.map(restaurant => `
+                <div onclick="showRestaurantDetails(${restaurant.id})" class="cursor-pointer hover:shadow-lg transition-shadow rounded-lg overflow-hidden border border-gray-200">
+                    <img src="${restaurant.image}" alt="${restaurant.name}" class="w-full h-48 object-cover">
+                    <div class="p-4">
+                        <div class="flex justify-between items-start mb-2">
+                            <h4 class="font-semibold text-lg">${restaurant.name}</h4>
+                            <span class="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-full">${restaurant.cuisine}</span>
+                        </div>
+                        <div class="flex items-center justify-between text-sm text-gray-600">
+                            <div class="flex items-center">
+                                <i class="fas fa-star text-yellow-400 mr-1"></i>
+                                <span>${restaurant.rating}</span>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-clock mr-1"></i>
+                                <span>${restaurant.deliveryTime}</span>
+                            </div>
+                        </div>
+                        <div class="mt-2">
+                            <span class="text-green-600 font-semibold">${restaurant.price}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Search functionality
+        function setupSearch() {
+            const searchInput = document.getElementById('searchInput');
+            searchInput.addEventListener('input', function(e) {
+                const query = e.target.value.toLowerCase();
+                const filtered = restaurants.filter(restaurant => 
+                    restaurant.name.toLowerCase().includes(query) ||
+                    restaurant.cuisine.toLowerCase().includes(query)
+                );
+                displayRestaurants(filtered);
+            });
+        }
+
+        // Filter by category
+        function filterByCategory(category) {
+            const filtered = restaurants.filter(restaurant => restaurant.category === category);
+            displayRestaurants(filtered);
+        }
+
+        // Show all restaurants
+        function showAllRestaurants() {
+            displayRestaurants(restaurants);
+        }
+
+        // Show restaurant details
+        function showRestaurantDetails(restaurantId) {
+            const restaurant = restaurants.find(r => r.id === restaurantId);
+            alert(`Restaurant: ${restaurant.name}\nCuisine: ${restaurant.cuisine}\nRating: ${restaurant.rating}\nDelivery: ${restaurant.deliveryTime}\n\nThis would show the restaurant menu and ordering options.`);
+        }
+
+        // Shopping cart functions
+        function showCart() {
+            document.getElementById('cartModal').classList.remove('hidden');
+            updateCartDisplay();
+        }
+
+        function hideCart() {
+            document.getElementById('cartModal').classList.add('hidden');
+        }
+
+        function addToCart(item) {
+            cart.push(item);
+            updateCartCount();
+            showCart();
+        }
+
+        function updateCartCount() {
+            document.getElementById('cartCount').textContent = cart.length;
+        }
+
+        function updateCartDisplay() {
+            const cartItems = document.getElementById('cartItems');
+            const cartTotal = document.getElementById('cartTotal');
+            
+            if (cart.length === 0) {
+                cartItems.innerHTML = '<p class="text-gray-500">Your cart is empty</p>';
+                cartTotal.textContent = '$0.00';
+                return;
+            }
+
+            cartItems.innerHTML = cart.map((item, index) => `
+                <div class="flex justify-between items-center">
+                    <span>${item.name}</span>
+                    <span>$${item.price}</span>
+                </div>
+            `).join('');
+
+            const total = cart.reduce((sum, item) => sum + item.price, 0);
+            cartTotal.textContent = `$${total.toFixed(2)}`;
+        }
+
+        function checkout() {
+            if (cart.length === 0) {
+                alert('Your cart is empty!');
+                return;
+            }
+            alert('Checkout functionality would be implemented here. This would connect to payment processing.');
+        }
+
+        // Other functions
+        function showVendorPortal() {
+            alert('Vendor Portal: This would show vendor dashboard for restaurant management.');
+        }
+
+        function showSignIn() {
+            alert('Sign In: This would show user authentication form.');
+        }
+
+        function showRestaurants() {
+            document.getElementById('mainContent').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function showVendorSignup() {
+            alert('Vendor Signup: This would show vendor registration form.');
+        }
+    </script>
+</body>
+</html>
