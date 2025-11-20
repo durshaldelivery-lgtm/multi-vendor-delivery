@@ -3,14 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QuickDeliver - Multi-Vendor Food Delivery</title>
-    <meta name="description" content="Order from your favorite local restaurants and get it delivered fast">
+    <title>QuickDeliver - Complete Multi-Vendor Food Delivery Platform</title>
+    <meta name="description" content="Complete multi-vendor food delivery platform with real-time ordering, tracking, and management">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .modal-backdrop { backdrop-filter: blur(4px); }
+        .slide-in { animation: slideIn 0.3s ease-out; }
+        .fade-in { animation: fadeIn 0.3s ease-out; }
+        @keyframes slideIn { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .notification { animation: slideInRight 0.3s ease-out; }
+        @keyframes slideInRight { from { transform: translateX(100%); } to { transform: translateX(0); } }
+    </style>
 </head>
 <body class="bg-gray-50">
+    <!-- Notification Container -->
+    <div id="notificationContainer" class="fixed top-20 right-4 z-50 space-y-2"></div>
+
     <!-- Header -->
-    <header class="bg-white shadow-sm sticky top-0 z-50">
+    <header class="bg-white shadow-sm sticky top-0 z-40">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
                 <div class="flex items-center">
@@ -26,26 +38,37 @@
                             placeholder="Search for food, restaurants, or items..."
                             class="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                         />
+                        <div id="searchResults" class="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg mt-1 hidden max-h-60 overflow-y-auto"></div>
                     </div>
                 </div>
 
                 <div class="flex items-center space-x-4">
-                    <button onclick="showLocationModal()" class="flex items-center px-3 py-2 text-gray-700 hover:text-green-600">
+                    <button onclick="showLocationModal()" class="flex items-center px-3 py-2 text-gray-700 hover:text-green-600 transition-colors">
                         <i class="fas fa-map-marker-alt mr-2"></i>
                         <span id="locationText">Set Location</span>
                     </button>
-                    <button onclick="showVendorPortal()" class="flex items-center px-3 py-2 text-gray-700 hover:text-green-600">
+                    <button onclick="showVendorPortal()" class="flex items-center px-3 py-2 text-gray-700 hover:text-green-600 transition-colors">
                         <i class="fas fa-store mr-2"></i>
                         Vendor Portal
                     </button>
-                    <button onclick="showSignIn()" class="flex items-center px-3 py-2 text-gray-700 hover:text-green-600">
-                        <i class="fas fa-user mr-2"></i>
-                        Sign In
+                    <button onclick="showDriverPortal()" class="flex items-center px-3 py-2 text-gray-700 hover:text-green-600 transition-colors">
+                        <i class="fas fa-truck mr-2"></i>
+                        Driver Portal
                     </button>
-                    <button onclick="showCart()" class="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
-                        <i class="fas fa-shopping-cart mr-2"></i>
-                        Cart <span id="cartCount" class="ml-1 bg-white text-green-600 rounded-full px-2 py-1 text-xs">0</span>
+                    <button onclick="showAdminPanel()" class="flex items-center px-3 py-2 text-gray-700 hover:text-green-600 transition-colors">
+                        <i class="fas fa-cog mr-2"></i>
+                        Admin
                     </button>
+                    <div id="userSection" class="flex items-center space-x-2">
+                        <button onclick="showSignIn()" class="flex items-center px-3 py-2 text-gray-700 hover:text-green-600 transition-colors">
+                            <i class="fas fa-user mr-2"></i>
+                            Sign In
+                        </button>
+                        <button onclick="showCart()" class="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                            <i class="fas fa-shopping-cart mr-2"></i>
+                            Cart <span id="cartCount" class="ml-1 bg-white text-green-600 rounded-full px-2 py-1 text-xs">0</span>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -66,11 +89,11 @@
                             Order from your favorite local restaurants and get it delivered fast
                         </p>
                         <div class="flex justify-center space-x-4">
-                            <button onclick="showRestaurants()" class="px-6 py-3 bg-white text-green-600 rounded-lg hover:bg-gray-100 font-semibold">
+                            <button onclick="showRestaurants()" class="px-6 py-3 bg-white text-green-600 rounded-lg hover:bg-gray-100 font-semibold transition-colors">
                                 Order Now
                                 <i class="fas fa-arrow-right ml-2"></i>
                             </button>
-                            <button onclick="showVendorSignup()" class="px-6 py-3 border border-white text-white rounded-lg hover:bg-white hover:text-green-600 font-semibold">
+                            <button onclick="showVendorSignup()" class="px-6 py-3 border border-white text-white rounded-lg hover:bg-white hover:text-green-600 font-semibold transition-colors">
                                 Become a Partner
                             </button>
                         </div>
@@ -83,37 +106,37 @@
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <h3 class="text-2xl font-bold mb-8">Shop by Category</h3>
                     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-                        <div onclick="filterByCategory('fast-food')" class="cursor-pointer hover:shadow-lg transition-shadow rounded-lg p-6 text-center border border-gray-200">
+                        <div onclick="filterByCategory('fast-food')" class="cursor-pointer hover:shadow-lg transition-all duration-300 rounded-lg p-6 text-center border border-gray-200 hover:border-green-500">
                             <div class="w-16 h-16 mx-auto mb-3 rounded-full bg-orange-100 flex items-center justify-center">
                                 <i class="fas fa-utensils text-orange-600 text-2xl"></i>
                             </div>
                             <p class="font-medium">Fast Food</p>
                         </div>
-                        <div onclick="filterByCategory('pizza')" class="cursor-pointer hover:shadow-lg transition-shadow rounded-lg p-6 text-center border border-gray-200">
+                        <div onclick="filterByCategory('pizza')" class="cursor-pointer hover:shadow-lg transition-all duration-300 rounded-lg p-6 text-center border border-gray-200 hover:border-green-500">
                             <div class="w-16 h-16 mx-auto mb-3 rounded-full bg-red-100 flex items-center justify-center">
                                 <i class="fas fa-pizza-slice text-red-600 text-2xl"></i>
                             </div>
                             <p class="font-medium">Pizza</p>
                         </div>
-                        <div onclick="filterByCategory('asian')" class="cursor-pointer hover:shadow-lg transition-shadow rounded-lg p-6 text-center border border-gray-200">
+                        <div onclick="filterByCategory('asian')" class="cursor-pointer hover:shadow-lg transition-all duration-300 rounded-lg p-6 text-center border border-gray-200 hover:border-green-500">
                             <div class="w-16 h-16 mx-auto mb-3 rounded-full bg-green-100 flex items-center justify-center">
                                 <i class="fas fa-utensils text-green-600 text-2xl"></i>
                             </div>
                             <p class="font-medium">Asian</p>
                         </div>
-                        <div onclick="filterByCategory('healthy')" class="cursor-pointer hover:shadow-lg transition-shadow rounded-lg p-6 text-center border border-gray-200">
+                        <div onclick="filterByCategory('healthy')" class="cursor-pointer hover:shadow-lg transition-all duration-300 rounded-lg p-6 text-center border border-gray-200 hover:border-green-500">
                             <div class="w-16 h-16 mx-auto mb-3 rounded-full bg-blue-100 flex items-center justify-center">
                                 <i class="fas fa-salad text-blue-600 text-2xl"></i>
                             </div>
                             <p class="font-medium">Healthy</p>
                         </div>
-                        <div onclick="filterByCategory('desserts')" class="cursor-pointer hover:shadow-lg transition-shadow rounded-lg p-6 text-center border border-gray-200">
+                        <div onclick="filterByCategory('desserts')" class="cursor-pointer hover:shadow-lg transition-all duration-300 rounded-lg p-6 text-center border border-gray-200 hover:border-green-500">
                             <div class="w-16 h-16 mx-auto mb-3 rounded-full bg-pink-100 flex items-center justify-center">
                                 <i class="fas fa-ice-cream text-pink-600 text-2xl"></i>
                             </div>
                             <p class="font-medium">Desserts</p>
                         </div>
-                        <div onclick="filterByCategory('beverages')" class="cursor-pointer hover:shadow-lg transition-shadow rounded-lg p-6 text-center border border-gray-200">
+                        <div onclick="filterByCategory('beverages')" class="cursor-pointer hover:shadow-lg transition-all duration-300 rounded-lg p-6 text-center border border-gray-200 hover:border-green-500">
                             <div class="w-16 h-16 mx-auto mb-3 rounded-full bg-purple-100 flex items-center justify-center">
                                 <i class="fas fa-coffee text-purple-600 text-2xl"></i>
                             </div>
@@ -128,10 +151,23 @@
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div class="flex justify-between items-center mb-8">
                         <h3 class="text-2xl font-bold">Featured Restaurants</h3>
-                        <button onclick="showAllRestaurants()" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">View All</button>
+                        <div class="flex space-x-2">
+                            <select id="sortBy" onchange="sortRestaurants()" class="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
+                                <option value="rating">Sort by Rating</option>
+                                <option value="deliveryTime">Sort by Delivery Time</option>
+                                <option value="price">Sort by Price</option>
+                                <option value="name">Sort by Name</option>
+                            </select>
+                            <button onclick="showAllRestaurants()" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">View All</button>
+                        </div>
                     </div>
                     <div id="restaurantGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                         <!-- Restaurants will be dynamically inserted here -->
+                    </div>
+                    <div class="text-center mt-8">
+                        <button onclick="loadMoreRestaurants()" class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                            Load More Restaurants
+                        </button>
                     </div>
                 </div>
             </section>
@@ -143,87 +179,729 @@
                 <div class="bg-white rounded-lg shadow-lg p-6">
                     <div class="flex justify-between items-center mb-6">
                         <h2 class="text-2xl font-bold text-gray-800">Vendor Dashboard</h2>
-                        <button onclick="showHomePage()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
+                        <button onclick="showHomePage()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors">
                             <i class="fas fa-arrow-left mr-2"></i> Back to Home
                         </button>
                     </div>
                     
+                    <!-- Stats Overview -->
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                        <div class="bg-blue-50 p-6 rounded-lg">
+                        <div class="bg-blue-50 p-6 rounded-lg hover:shadow-md transition-shadow">
                             <div class="flex items-center justify-between">
                                 <div>
                                     <p class="text-sm text-gray-600">Total Orders</p>
-                                    <p class="text-2xl font-bold text-blue-600">156</p>
+                                    <p class="text-2xl font-bold text-blue-600" id="totalOrders">156</p>
+                                    <p class="text-xs text-green-600">↑ 12% from last month</p>
                                 </div>
                                 <i class="fas fa-shopping-bag text-blue-600 text-2xl"></i>
                             </div>
                         </div>
-                        <div class="bg-green-50 p-6 rounded-lg">
+                        <div class="bg-green-50 p-6 rounded-lg hover:shadow-md transition-shadow">
                             <div class="flex items-center justify-between">
                                 <div>
                                     <p class="text-sm text-gray-600">Revenue</p>
-                                    <p class="text-2xl font-bold text-green-600">$4,523</p>
+                                    <p class="text-2xl font-bold text-green-600" id="totalRevenue">$4,523</p>
+                                    <p class="text-xs text-green-600">↑ 8% from last month</p>
                                 </div>
                                 <i class="fas fa-dollar-sign text-green-600 text-2xl"></i>
                             </div>
                         </div>
-                        <div class="bg-yellow-50 p-6 rounded-lg">
+                        <div class="bg-yellow-50 p-6 rounded-lg hover:shadow-md transition-shadow">
                             <div class="flex items-center justify-between">
                                 <div>
                                     <p class="text-sm text-gray-600">Rating</p>
-                                    <p class="text-2xl font-bold text-yellow-600">4.8</p>
+                                    <p class="text-2xl font-bold text-yellow-600" id="vendorRating">4.8</p>
+                                    <p class="text-xs text-gray-600">Based on 89 reviews</p>
                                 </div>
                                 <i class="fas fa-star text-yellow-600 text-2xl"></i>
                             </div>
                         </div>
-                        <div class="bg-purple-50 p-6 rounded-lg">
+                        <div class="bg-purple-50 p-6 rounded-lg hover:shadow-md transition-shadow">
                             <div class="flex items-center justify-between">
                                 <div>
                                     <p class="text-sm text-gray-600">Products</p>
-                                    <p class="text-2xl font-bold text-purple-600">42</p>
+                                    <p class="text-2xl font-bold text-purple-600" id="totalProducts">42</p>
+                                    <p class="text-xs text-gray-600">6 out of stock</p>
                                 </div>
                                 <i class="fas fa-box text-purple-600 text-2xl"></i>
                             </div>
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <div class="bg-gray-50 p-6 rounded-lg">
-                            <h3 class="text-lg font-semibold mb-4">Recent Orders</h3>
-                            <div class="space-y-3">
-                                <div class="bg-white p-4 rounded border border-gray-200">
-                                    <div class="flex justify-between items-center">
-                                        <div>
-                                            <p class="font-medium">Order #1234</p>
-                                            <p class="text-sm text-gray-600">John Doe - 2 items</p>
-                                        </div>
-                                        <span class="px-3 py-1 bg-green-100 text-green-700 text-sm rounded-full">Completed</span>
+                    <!-- Tabs -->
+                    <div class="border-b border-gray-200 mb-6">
+                        <nav class="-mb-px flex space-x-8">
+                            <button onclick="showVendorTab('orders')" class="vendor-tab py-2 px-1 border-b-2 font-medium text-sm border-green-500 text-green-600">
+                                Orders
+                            </button>
+                            <button onclick="showVendorTab('products')" class="vendor-tab py-2 px-1 border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                                Products
+                            </button>
+                            <button onclick="showVendorTab('analytics')" class="vendor-tab py-2 px-1 border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                                Analytics
+                            </button>
+                            <button onclick="showVendorTab('settings')" class="vendor-tab py-2 px-1 border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                                Settings
+                            </button>
+                        </nav>
+                    </div>
+
+                    <!-- Tab Content -->
+                    <div id="vendorTabContent">
+                        <!-- Orders Tab -->
+                        <div id="ordersTab" class="vendor-tab-content">
+                            <div class="space-y-4">
+                                <div class="bg-white p-4 rounded-lg border border-gray-200">
+                                    <div class="flex justify-between items-center mb-2">
+                                        <h4 class="font-semibold">Order Management</h4>
+                                        <select class="px-3 py-1 border border-gray-300 rounded text-sm">
+                                            <option>All Orders</option>
+                                            <option>New Orders</option>
+                                            <option>Preparing</option>
+                                            <option>Ready for Pickup</option>
+                                            <option>Delivered</option>
+                                        </select>
                                     </div>
-                                </div>
-                                <div class="bg-white p-4 rounded border border-gray-200">
-                                    <div class="flex justify-between items-center">
-                                        <div>
-                                            <p class="font-medium">Order #1235</p>
-                                            <p class="text-sm text-gray-600">Jane Smith - 3 items</p>
+                                    <div class="space-y-3">
+                                        <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                            <div class="flex justify-between items-center">
+                                                <div>
+                                                    <p class="font-medium">Order #1234</p>
+                                                    <p class="text-sm text-gray-600">John Doe - 2 items</p>
+                                                    <p class="text-xs text-gray-500">Placed 10 mins ago</p>
+                                                </div>
+                                                <div class="flex items-center space-x-2">
+                                                    <span class="px-3 py-1 bg-yellow-100 text-yellow-700 text-sm rounded-full">Preparing</span>
+                                                    <button onclick="updateOrderStatus(1234, 'ready')" class="px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700">Mark Ready</button>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <span class="px-3 py-1 bg-yellow-100 text-yellow-700 text-sm rounded-full">Preparing</span>
+                                        <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                            <div class="flex justify-between items-center">
+                                                <div>
+                                                    <p class="font-medium">Order #1235</p>
+                                                    <p class="text-sm text-gray-600">Jane Smith - 3 items</p>
+                                                    <p class="text-xs text-gray-500">Placed 25 mins ago</p>
+                                                </div>
+                                                <div class="flex items-center space-x-2">
+                                                    <span class="px-3 py-1 bg-green-100 text-green-700 text-sm rounded-full">Completed</span>
+                                                    <button onclick="viewOrderDetails(1235)" class="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700">View Details</button>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        
-                        <div class="bg-gray-50 p-6 rounded-lg">
-                            <h3 class="text-lg font-semibold mb-4">Quick Actions</h3>
-                            <div class="space-y-3">
-                                <button onclick="showAddProduct()" class="w-full text-left px-4 py-3 bg-white border border-gray-200 rounded-lg hover:bg-gray-50">
-                                    <i class="fas fa-plus mr-3 text-green-600"></i> Add New Product
-                                </button>
-                                <button onclick="showOrders()" class="w-full text-left px-4 py-3 bg-white border border-gray-200 rounded-lg hover:bg-gray-50">
-                                    <i class="fas fa-list mr-3 text-blue-600"></i> View All Orders
-                                </button>
-                                <button onclick="showAnalytics()" class="w-full text-left px-4 py-3 bg-white border border-gray-200 rounded-lg hover:bg-gray-50">
-                                    <i class="fas fa-chart-bar mr-3 text-purple-600"></i> View Analytics
-                                </button>
+
+                        <!-- Products Tab -->
+                        <div id="productsTab" class="vendor-tab-content hidden">
+                            <div class="space-y-4">
+                                <div class="flex justify-between items-center mb-4">
+                                    <h4 class="font-semibold">Product Management</h4>
+                                    <button onclick="showAddProductModal()" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                                        <i class="fas fa-plus mr-2"></i> Add New Product
+                                    </button>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    <div class="bg-white p-4 rounded-lg border border-gray-200">
+                                        <img src="https://via.placeholder.com/200x150/4ECDC4/FFFFFF?text=Burger" alt="Product" class="w-full h-32 object-cover rounded mb-3">
+                                        <h5 class="font-semibold mb-1">Classic Burger</h5>
+                                        <p class="text-sm text-gray-600 mb-2">Juicy beef patty with fresh vegetables</p>
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-green-600 font-bold">$12.99</span>
+                                            <div class="flex space-x-2">
+                                                <button onclick="editProduct(1)" class="px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700">Edit</button>
+                                                <button onclick="toggleProductAvailability(1)" class="px-2 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700">Available</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Analytics Tab -->
+                        <div id="analyticsTab" class="vendor-tab-content hidden">
+                            <div class="space-y-6">
+                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    <div class="bg-white p-6 rounded-lg border border-gray-200">
+                                        <h4 class="font-semibold mb-4">Sales Overview</h4>
+                                        <div class="space-y-3">
+                                            <div class="flex justify-between">
+                                                <span class="text-sm text-gray-600">Today's Sales</span>
+                                                <span class="font-semibold">$456.78</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span class="text-sm text-gray-600">This Week</span>
+                                                <span class="font-semibold">$2,134.50</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span class="text-sm text-gray-600">This Month</span>
+                                                <span class="font-semibold">$8,567.23</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="bg-white p-6 rounded-lg border border-gray-200">
+                                        <h4 class="font-semibold mb-4">Top Selling Items</h4>
+                                        <div class="space-y-2">
+                                            <div class="flex justify-between items-center">
+                                                <span class="text-sm">Classic Burger</span>
+                                                <span class="text-sm font-semibold">45 orders</span>
+                                            </div>
+                                            <div class="flex justify-between items-center">
+                                                <span class="text-sm">Margherita Pizza</span>
+                                                <span class="text-sm font-semibold">38 orders</span>
+                                            </div>
+                                            <div class="flex justify-between items-center">
+                                                <span class="text-sm">Caesar Salad</span>
+                                                <span class="text-sm font-semibold">32 orders</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="bg-white p-6 rounded-lg border border-gray-200">
+                                        <h4 class="font-semibold mb-4">Customer Satisfaction</h4>
+                                        <div class="space-y-2">
+                                            <div class="flex justify-between items-center">
+                                                <span class="text-sm">Average Rating</span>
+                                                <span class="text-sm font-semibold">4.8/5.0</span>
+                                            </div>
+                                            <div class="flex justify-between items-center">
+                                                <span class="text-sm">On-time Delivery</span>
+                                                <span class="text-sm font-semibold">96%</span>
+                                            </div>
+                                            <div class="flex justify-between items-center">
+                                                <span class="text-sm">Repeat Customers</span>
+                                                <span class="text-sm font-semibold">34%</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Settings Tab -->
+                        <div id="settingsTab" class="vendor-tab-content hidden">
+                            <div class="space-y-6">
+                                <div class="bg-white p-6 rounded-lg border border-gray-200">
+                                    <h4 class="font-semibold mb-4">Restaurant Information</h4>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">Restaurant Name</label>
+                                            <input type="text" value="Burger Palace" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
+                                            <input type="tel" value="+1 234 567 8900" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                                            <input type="email" value="contact@burgerpalace.com" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">Address</label>
+                                            <input type="text" value="123 Main St, City, State 12345" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500">
+                                        </div>
+                                    </div>
+                                    <div class="mt-4">
+                                        <button onclick="saveVendorSettings()" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                                            Save Settings
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Driver Portal Page -->
+        <div id="driverPortal" class="page hidden">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold text-gray-800">Driver Dashboard</h2>
+                        <button onclick="showHomePage()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors">
+                            <i class="fas fa-arrow-left mr-2"></i> Back to Home
+                        </button>
+                    </div>
+                    
+                    <!-- Driver Stats -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                        <div class="bg-green-50 p-6 rounded-lg">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm text-gray-600">Available Orders</p>
+                                    <p class="text-2xl font-bold text-green-600">8</p>
+                                </div>
+                                <i class="fas fa-clipboard-list text-green-600 text-2xl"></i>
+                            </div>
+                        </div>
+                        <div class="bg-blue-50 p-6 rounded-lg">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm text-gray-600">Active Delivery</p>
+                                    <p class="text-2xl font-bold text-blue-600">1</p>
+                                </div>
+                                <i class="fas fa-truck text-blue-600 text-2xl"></i>
+                            </div>
+                        </div>
+                        <div class="bg-purple-50 p-6 rounded-lg">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm text-gray-600">Today's Earnings</p>
+                                    <p class="text-2xl font-bold text-purple-600">$127.50</p>
+                                </div>
+                                <i class="fas fa-dollar-sign text-purple-600 text-2xl"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Driver Tabs -->
+                    <div class="border-b border-gray-200 mb-6">
+                        <nav class="-mb-px flex space-x-8">
+                            <button onclick="showDriverTab('available')" class="driver-tab py-2 px-1 border-b-2 font-medium text-sm border-green-500 text-green-600">
+                                Available Orders
+                            </button>
+                            <button onclick="showDriverTab('active')" class="driver-tab py-2 px-1 border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                                Active Delivery
+                            </button>
+                            <button onclick="showDriverTab('completed')" class="driver-tab py-2 px-1 border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                                Completed
+                            </button>
+                        </nav>
+                    </div>
+
+                    <!-- Driver Tab Content -->
+                    <div id="driverTabContent">
+                        <!-- Available Orders -->
+                        <div id="availableOrdersTab" class="driver-tab-content">
+                            <div class="space-y-4">
+                                <div class="bg-white p-4 rounded-lg border border-gray-200">
+                                    <div class="flex justify-between items-center mb-2">
+                                        <h4 class="font-semibold">Available Orders</h4>
+                                        <span class="text-sm text-gray-600">8 orders ready for pickup</span>
+                                    </div>
+                                    <div class="space-y-3">
+                                        <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                            <div class="flex justify-between items-start">
+                                                <div>
+                                                    <p class="font-medium">Order #1236</p>
+                                                    <p class="text-sm text-gray-600">Pizza Express - 2 items</p>
+                                                    <p class="text-sm text-gray-600">Pickup: 123 Main St</p>
+                                                    <p class="text-sm text-gray-600">Delivery: 456 Oak Ave</p>
+                                                    <p class="text-sm font-semibold text-green-600">$8.50 delivery fee</p>
+                                                </div>
+                                                <div class="flex space-x-2">
+                                                    <button onclick="acceptOrder(1236)" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                                                        Accept Order
+                                                    </button>
+                                                    <button onclick="viewOrderOnMap(1236)" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                                                        View Map
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Active Delivery -->
+                        <div id="activeDeliveryTab" class="driver-tab-content hidden">
+                            <div class="space-y-4">
+                                <div class="bg-white p-4 rounded-lg border border-gray-200">
+                                    <div class="flex justify-between items-center mb-2">
+                                        <h4 class="font-semibold">Active Delivery</h4>
+                                        <span class="text-sm text-gray-600">Order #1234 - In Progress</span>
+                                    </div>
+                                    <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                        <div class="flex justify-between items-start mb-4">
+                                            <div>
+                                                <p class="font-medium">Customer: John Doe</p>
+                                                <p class="text-sm text-gray-600">Phone: (555) 123-4567</p>
+                                                <p class="text-sm text-gray-600">Delivery: 456 Oak Ave, Apt 2B</p>
+                                            </div>
+                                            <div class="text-right">
+                                                <span class="px-3 py-1 bg-blue-100 text-blue-700 text-sm rounded-full">In Transit</span>
+                                            </div>
+                                        </div>
+                                        <div class="bg-gray-100 p-4 rounded-lg">
+                                            <p class="text-sm text-gray-600 mb-2">Delivery Route</p>
+                                            <div class="flex items-center space-x-2 text-sm">
+                                                <i class="fas fa-map-marker-alt text-green-600"></i>
+                                                <span>Pickup: 123 Main St</span>
+                                                <i class="fas fa-arrow-right text-gray-400"></i>
+                                                <i class="fas fa-home text-blue-600"></i>
+                                                <span>Delivery: 456 Oak Ave</span>
+                                            </div>
+                                        </div>
+                                        <div class="flex space-x-2 mt-4">
+                                            <button onclick="updateDeliveryStatus('picked-up')" class="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors">
+                                                Mark Picked Up
+                                            </button>
+                                            <button onclick="updateDeliveryStatus('delivered')" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                                                Mark Delivered
+                                            </button>
+                                            <button onclick="contactCustomer()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                                                Contact Customer
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Completed -->
+                        <div id="completedTab" class="driver-tab-content hidden">
+                            <div class="space-y-4">
+                                <div class="bg-white p-4 rounded-lg border border-gray-200">
+                                    <div class="flex justify-between items-center mb-2">
+                                        <h4 class="font-semibold">Completed Deliveries</h4>
+                                        <span class="text-sm text-gray-600">Today: 12 deliveries</span>
+                                    </div>
+                                    <div class="space-y-3">
+                                        <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                            <div class="flex justify-between items-center">
+                                                <div>
+                                                    <p class="font-medium">Order #1232</p>
+                                                    <p class="text-sm text-gray-600">Jane Smith - 3 items</p>
+                                                    <p class="text-sm text-gray-600">Completed at 2:45 PM</p>
+                                                </div>
+                                                <div class="text-right">
+                                                    <span class="px-3 py-1 bg-green-100 text-green-700 text-sm rounded-full">Delivered</span>
+                                                    <p class="text-sm font-semibold text-green-600">+$7.25 earned</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Panel Page -->
+        <div id="adminPanel" class="page hidden">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold text-gray-800">Admin Dashboard</h2>
+                        <button onclick="showHomePage()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors">
+                            <i class="fas fa-arrow-left mr-2"></i> Back to Home
+                        </button>
+                    </div>
+                    
+                    <!-- Admin Stats -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                        <div class="bg-blue-50 p-6 rounded-lg">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm text-gray-600">Total Users</p>
+                                    <p class="text-2xl font-bold text-blue-600">1,234</p>
+                                    <p class="text-xs text-green-600">↑ 15% from last month</p>
+                                </div>
+                                <i class="fas fa-users text-blue-600 text-2xl"></i>
+                            </div>
+                        </div>
+                        <div class="bg-green-50 p-6 rounded-lg">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm text-gray-600">Active Vendors</p>
+                                    <p class="text-2xl font-bold text-green-600">89</p>
+                                    <p class="text-xs text-green-600">↑ 8% from last month</p>
+                                </div>
+                                <i class="fas fa-store text-green-600 text-2xl"></i>
+                            </div>
+                        </div>
+                        <div class="bg-yellow-50 p-6 rounded-lg">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm text-gray-600">Active Drivers</p>
+                                    <p class="text-2xl font-bold text-yellow-600">45</p>
+                                    <p class="text-xs text-green-600">↑ 12% from last month</p>
+                                </div>
+                                <i class="fas fa-truck text-yellow-600 text-2xl"></i>
+                            </div>
+                        </div>
+                        <div class="bg-purple-50 p-6 rounded-lg">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm text-gray-600">Platform Revenue</p>
+                                    <p class="text-2xl font-bold text-purple-600">$12,456</p>
+                                    <p class="text-xs text-green-600">↑ 22% from last month</p>
+                                </div>
+                                <i class="fas fa-chart-line text-purple-600 text-2xl"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Admin Tabs -->
+                    <div class="border-b border-gray-200 mb-6">
+                        <nav class="-mb-px flex space-x-8">
+                            <button onclick="showAdminTab('overview')" class="admin-tab py-2 px-1 border-b-2 font-medium text-sm border-green-500 text-green-600">
+                                Overview
+                            </button>
+                            <button onclick="showAdminTab('users')" class="admin-tab py-2 px-1 border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                                Users
+                            </button>
+                            <button onclick="showAdminTab('vendors')" class="admin-tab py-2 px-1 border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                                Vendors
+                            </button>
+                            <button onclick="showAdminTab('orders')" class="admin-tab py-2 px-1 border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                                Orders
+                            </button>
+                            <button onclick="showAdminTab('analytics')" class="admin-tab py-2 px-1 border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                                Analytics
+                            </button>
+                            <button onclick="showAdminTab('settings')" class="admin-tab py-2 px-1 border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                                Settings
+                            </button>
+                        </nav>
+                    </div>
+
+                    <!-- Admin Tab Content -->
+                    <div id="adminTabContent">
+                        <!-- Overview Tab -->
+                        <div id="overviewTab" class="admin-tab-content">
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                <div class="bg-white p-6 rounded-lg border border-gray-200">
+                                    <h4 class="font-semibold mb-4">Platform Overview</h4>
+                                    <div class="space-y-3">
+                                        <div class="flex justify-between">
+                                            <span class="text-sm text-gray-600">Total Orders Today</span>
+                                            <span class="font-semibold">234</span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span class="text-sm text-gray-600">Pending Vendor Applications</span>
+                                            <span class="font-semibold text-orange-600">7</span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span class="text-sm text-gray-600">System Health</span>
+                                            <span class="font-semibold text-green-600">Operational</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="bg-white p-6 rounded-lg border border-gray-200">
+                                    <h4 class="font-semibold mb-4">Recent Activity</h4>
+                                    <div class="space-y-2">
+                                        <div class="flex justify-between items-center py-2 border-b">
+                                            <span class="text-sm">New vendor registration: Pizza House</span>
+                                            <span class="text-xs text-gray-500">2 mins ago</span>
+                                        </div>
+                                        <div class="flex justify-between items-center py-2 border-b">
+                                            <span class="text-sm">Order #1237 completed</span>
+                                            <span class="text-xs text-gray-500">5 mins ago</span>
+                                        </div>
+                                        <div class="flex justify-between items-center py-2">
+                                            <span class="text-sm">System backup completed</span>
+                                            <span class="text-xs text-gray-500">1 hour ago</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Users Tab -->
+                        <div id="usersTab" class="admin-tab-content hidden">
+                            <div class="bg-white p-6 rounded-lg border border-gray-200">
+                                <div class="flex justify-between items-center mb-4">
+                                    <h4 class="font-semibold">User Management</h4>
+                                    <button onclick="showAddUserModal()" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                                        <i class="fas fa-plus mr-2"></i> Add User
+                                    </button>
+                                </div>
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full divide-y divide-gray-200">
+                                        <thead class="bg-gray-50">
+                                            <tr>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="bg-white divide-y divide-gray-200">
+                                            <tr>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">John Doe</td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">john@example.com</td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Customer</td>
+                                                <td class="px-6 py-4 whitespace-nowrap">
+                                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Active</span>
+                                                </td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                    <button onclick="editUser(1)" class="text-indigo-600 hover:text-indigo-900 mr-2">Edit</button>
+                                                    <button onclick="suspendUser(1)" class="text-red-600 hover:text-red-900">Suspend</button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Vendors Tab -->
+                        <div id="vendorsTab" class="admin-tab-content hidden">
+                            <div class="bg-white p-6 rounded-lg border border-gray-200">
+                                <div class="flex justify-between items-center mb-4">
+                                    <h4 class="font-semibold">Vendor Management</h4>
+                                    <div class="flex space-x-2">
+                                        <select class="px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                                            <option>All Vendors</option>
+                                            <option>Pending Approval</option>
+                                            <option>Active</option>
+                                            <option>Suspended</option>
+                                        </select>
+                                        <button onclick="exportVendorData()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                                            <i class="fas fa-download mr-2"></i> Export
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                        <div class="flex justify-between items-start mb-2">
+                                            <div>
+                                                <h5 class="font-semibold">Burger Palace</h5>
+                                                <p class="text-sm text-gray-600">American Fast Food</p>
+                                                <p class="text-sm text-gray-600">Rating: 4.8/5.0</p>
+                                            </div>
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Active</span>
+                                        </div>
+                                        <div class="flex space-x-2 mt-3">
+                                            <button onclick="viewVendorDetails(1)" class="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700">View Details</button>
+                                            <button onclick="editVendor(1)" class="px-3 py-1 bg-yellow-600 text-white text-sm rounded hover:bg-yellow-700">Edit</button>
+                                            <button onclick="suspendVendor(1)" class="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700">Suspend</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Orders Tab -->
+                        <div id="ordersTab" class="admin-tab-content hidden">
+                            <div class="bg-white p-6 rounded-lg border border-gray-200">
+                                <div class="flex justify-between items-center mb-4">
+                                    <h4 class="font-semibold">Order Management</h4>
+                                    <div class="flex space-x-2">
+                                        <input type="date" class="px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                                        <select class="px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                                            <option>All Status</option>
+                                            <option>Pending</option>
+                                            <option>Preparing</option>
+                                            <option>Out for Delivery</option>
+                                            <option>Delivered</option>
+                                            <option>Cancelled</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="space-y-3">
+                                    <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                        <div class="flex justify-between items-center">
+                                            <div>
+                                                <p class="font-medium">Order #1238</p>
+                                                <p class="text-sm text-gray-600">Customer: Alice Johnson</p>
+                                                <p class="text-sm text-gray-600">Vendor: Sushi Master</p>
+                                                <p class="text-sm text-gray-600">Total: $45.67</p>
+                                            </div>
+                                            <div class="text-right">
+                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">Preparing</span>
+                                                <button onclick="viewOrderDetails(1238)" class="ml-2 text-indigo-600 hover:text-indigo-900">View Details</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Analytics Tab -->
+                        <div id="analyticsTab" class="admin-tab-content hidden">
+                            <div class="space-y-6">
+                                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                    <div class="bg-white p-6 rounded-lg border border-gray-200">
+                                        <h4 class="font-semibold mb-4">Revenue Analytics</h4>
+                                        <div class="space-y-3">
+                                            <div class="flex justify-between">
+                                                <span class="text-sm text-gray-600">Today's Revenue</span>
+                                                <span class="font-semibold">$2,345.67</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span class="text-sm text-gray-600">This Week</span>
+                                                <span class="font-semibold">$14,567.89</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span class="text-sm text-gray-600">This Month</span>
+                                                <span class="font-semibold">$58,234.12</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="bg-white p-6 rounded-lg border border-gray-200">
+                                        <h4 class="font-semibold mb-4">Growth Metrics</h4>
+                                        <div class="space-y-3">
+                                            <div class="flex justify-between">
+                                                <span class="text-sm text-gray-600">New Users (30 days)</span>
+                                                <span class="font-semibold text-green-600">+234</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span class="text-sm text-gray-600">New Vendors (30 days)</span>
+                                                <span class="font-semibold text-green-600">+12</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span class="text-sm text-gray-600">Order Growth</span>
+                                                <span class="font-semibold text-green-600">+18%</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Settings Tab -->
+                        <div id="settingsTab" class="admin-tab-content hidden">
+                            <div class="space-y-6">
+                                <div class="bg-white p-6 rounded-lg border border-gray-200">
+                                    <h4 class="font-semibold mb-4">Platform Settings</h4>
+                                    <div class="space-y-4">
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700">Commission Rate</label>
+                                                <p class="text-xs text-gray-500">Percentage charged to vendors</p>
+                                            </div>
+                                            <div class="flex items-center space-x-2">
+                                                <input type="number" value="15" min="0" max="100" class="w-20 px-3 py-2 border border-gray-300 rounded-md text-sm">
+                                                <span class="text-sm text-gray-600">%</span>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700">Delivery Fee</label>
+                                                <p class="text-xs text-gray-500">Standard delivery charge</p>
+                                            </div>
+                                            <div class="flex items-center space-x-2">
+                                                <span class="text-sm text-gray-600">$</span>
+                                                <input type="number" value="2.99" min="0" step="0.01" class="w-20 px-3 py-2 border border-gray-300 rounded-md text-sm">
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700">Platform Mode</label>
+                                                <p class="text-xs text-gray-500">Current operating mode</p>
+                                            </div>
+                                            <select class="px-3 py-2 border border-gray-300 rounded-md text-sm">
+                                                <option>Live</option>
+                                                <option>Maintenance</option>
+                                                <option>Testing</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="mt-6">
+                                        <button onclick="saveAdminSettings()" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                                            Save Settings
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -259,7 +937,7 @@
                                 <label for="remember-me" class="ml-2 block text-sm text-gray-900">Remember me</label>
                             </div>
                             <div class="text-sm">
-                                <a href="#" class="font-medium text-green-600 hover:text-green-500">Forgot your password?</a>
+                                <a href="#" onclick="showForgotPassword()" class="font-medium text-green-600 hover:text-green-500">Forgot your password?</a>
                             </div>
                         </div>
 
@@ -280,11 +958,11 @@
                             </div>
                         </div>
                         <div class="mt-6 grid grid-cols-2 gap-3">
-                            <button class="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                                <i class="fab fa-google"></i>
+                            <button type="button" onclick="signInWithGoogle()" class="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                <i class="fab fa-google mr-2"></i> Google
                             </button>
-                            <button class="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                                <i class="fab fa-facebook"></i>
+                            <button type="button" onclick="signInWithFacebook()" class="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                <i class="fab fa-facebook mr-2"></i> Facebook
                             </button>
                         </div>
                     </div>
@@ -294,9 +972,9 @@
     </main>
 
     <!-- Location Modal -->
-    <div id="locationModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
+    <div id="locationModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden modal-backdrop">
         <div class="flex items-center justify-center h-full">
-            <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4 fade-in">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="text-lg font-semibold">Set Your Location</h3>
                     <button onclick="hideLocationModal()" class="text-gray-500 hover:text-gray-700">
@@ -307,6 +985,14 @@
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Enter your address</label>
                         <input type="text" id="addressInput" placeholder="123 Main St, City, State" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Apartment/Suite (Optional)</label>
+                        <input type="text" id="apartmentInput" placeholder="Apt 2B" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Delivery Instructions (Optional)</label>
+                        <textarea id="deliveryInstructions" rows="3" placeholder="Ring doorbell, leave at front desk, etc." class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500"></textarea>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Or use current location</label>
@@ -324,27 +1010,92 @@
     </div>
 
     <!-- Shopping Cart Modal -->
-    <div id="cartModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
+    <div id="cartModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden modal-backdrop">
         <div class="flex items-center justify-center h-full">
-            <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4 fade-in">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="text-lg font-semibold">Shopping Cart</h3>
                     <button onclick="hideCart()" class="text-gray-500 hover:text-gray-700">
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
-                <div id="cartItems" class="space-y-2">
+                <div id="cartItems" class="space-y-2 max-h-60 overflow-y-auto">
                     <!-- Cart items will be dynamically inserted here -->
                 </div>
                 <div class="border-t pt-4 mt-4">
+                    <div class="flex justify-between items-center mb-4">
+                        <span class="font-semibold">Subtotal:</span>
+                        <span id="cartSubtotal" class="text-lg font-bold text-gray-700">$0.00</span>
+                    </div>
+                    <div class="flex justify-between items-center mb-4">
+                        <span class="font-semibold">Delivery Fee:</span>
+                        <span id="cartDelivery" class="text-lg font-bold text-gray-700">$2.99</span>
+                    </div>
+                    <div class="flex justify-between items-center mb-4">
+                        <span class="font-semibold">Tax:</span>
+                        <span id="cartTax" class="text-lg font-bold text-gray-700">$0.00</span>
+                    </div>
                     <div class="flex justify-between items-center">
                         <span class="font-semibold">Total:</span>
                         <span id="cartTotal" class="text-xl font-bold text-green-600">$0.00</span>
                     </div>
                     <button onclick="checkout()" class="w-full mt-4 bg-green-600 text-white py-2 rounded-lg hover:bg-green-700">
-                        Checkout
+                        Proceed to Checkout
                     </button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Product Modal -->
+    <div id="addProductModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden modal-backdrop">
+        <div class="flex items-center justify-center h-full">
+            <div class="bg-white rounded-lg p-6 max-w-lg w-full mx-4 fade-in">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold">Add New Product</h3>
+                    <button onclick="hideAddProductModal()" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <form onsubmit="addNewProduct(event)" class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Product Name</label>
+                            <input type="text" id="productName" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Price</label>
+                            <input type="number" id="productPrice" step="0.01" min="0" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Category</label>
+                            <select id="productCategory" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500">
+                                <option value="fast-food">Fast Food</option>
+                                <option value="pizza">Pizza</option>
+                                <option value="asian">Asian</option>
+                                <option value="healthy">Healthy</option>
+                                <option value="desserts">Desserts</option>
+                                <option value="beverages">Beverages</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Description</label>
+                            <textarea id="productDescription" rows="3" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500"></textarea>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Product Image URL</label>
+                        <input type="url" id="productImage" placeholder="https://example.com/image.jpg" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500">
+                    </div>
+                    <div class="flex items-center">
+                        <input type="checkbox" id="productAvailable" class="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded">
+                        <label for="productAvailable" class="ml-2 block text-sm text-gray-900">Available for order</label>
+                    </div>
+                    <div class="flex space-x-3">
+                        <button type="button" onclick="hideAddProductModal()" class="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">Cancel</button>
+                        <button type="submit" class="flex-1 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">Add Product</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -352,59 +1103,133 @@
     <!-- Footer -->
     <footer class="bg-gray-900 text-white py-12">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center">
-                <h3 class="text-xl font-bold mb-4">QuickDeliver</h3>
-                <p class="text-gray-400 mb-8">Your favorite food, delivered fast.</p>
-                <div class="border-t border-gray-800 pt-8 text-gray-400">
-                    <p>&copy; 2024 QuickDeliver. All rights reserved.</p>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="text-xl font-bold mb-4">QuickDeliver</h3>
+                    <p class="text-gray-400 mb-4">Your favorite food, delivered fast.</p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-facebook"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">For Customers</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="#" class="hover:text-white">Order Food</a></li>
+                        <li><a href="#" class="hover:text-white">Track Orders</a></li>
+                        <li><a href="#" class="hover:text-white">Payment Methods</a></li>
+                        <li><a href="#" class="hover:text-white">Help Center</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">For Partners</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="#" class="hover:text-white">Partner With Us</a></li>
+                        <li><a href="#" class="hover:text-white">Restaurant Dashboard</a></li>
+                        <li><a href="#" class="hover:text-white">Delivery Partners</a></li>
+                        <li><a href="#" class="hover:text-white">Marketing Tools</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Company</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="#" class="hover:text-white">About Us</a></li>
+                        <li><a href="#" class="hover:text-white">Careers</a></li>
+                        <li><a href="#" class="hover:text-white">Press</a></li>
+                        <li><a href="#" class="hover:text-white">Contact</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+                <p>&copy; 2024 QuickDeliver. All rights reserved.</p>
+                <div class="mt-2 space-x-4 justify-center">
+                    <a href="#" class="text-gray-400 hover:text-white">Privacy Policy</a>
+                    <span class="text-gray-400">•</span>
+                    <a href="#" class="text-gray-400 hover:text-white">Terms of Service</a>
                 </div>
             </div>
         </div>
     </footer>
 
     <script>
-        // Restaurant data
-        const restaurants = [
-            { id: 1, name: 'Burger Palace', category: 'fast-food', cuisine: 'American', rating: 4.8, deliveryTime: '25-35 min', price: '$$', image: 'https://via.placeholder.com/300x200/FF6B6B/FFFFFF?text=Burger+Palace' },
-            { id: 2, name: 'Pizza Express', category: 'pizza', cuisine: 'Italian', rating: 4.6, deliveryTime: '30-40 min', price: '$$', image: 'https://via.placeholder.com/300x200/4ECDC4/FFFFFF?text=Pizza+Express' },
-            { id: 3, name: 'Sushi Master', category: 'asian', cuisine: 'Japanese', rating: 4.9, deliveryTime: '35-45 min', price: '$$$', image: 'https://via.placeholder.com/300x200/45B7D1/FFFFFF?text=Sushi+Master' },
-            { id: 4, name: 'Taco Fiesta', category: 'mexican', cuisine: 'Mexican', rating: 4.7, deliveryTime: '20-30 min', price: '$', image: 'https://via.placeholder.com/300x200/F39C12/FFFFFF?text=Taco+Fiesta' },
-            { id: 5, name: 'Green Salad', category: 'healthy', cuisine: 'Healthy', rating: 4.5, deliveryTime: '15-25 min', price: '$', image: 'https://via.placeholder.com/300x200/27AE60/FFFFFF?text=Green+Salad' },
-            { id: 6, name: 'Sweet Dreams', category: 'desserts', cuisine: 'Desserts', rating: 4.8, deliveryTime: '20-30 min', price: '$$', image: 'https://via.placeholder.com/300x200/E91E63/FFFFFF?text=Sweet+Dreams' }
-        ];
+        // Complete Data Store
+        const appData = {
+            restaurants: [
+                { id: 1, name: 'Burger Palace', category: 'fast-food', cuisine: 'American', rating: 4.8, deliveryTime: '25-35 min', price: '$$', image: 'https://via.placeholder.com/300x200/FF6B6B/FFFFFF?text=Burger+Palace', products: [
+                    { id: 1, name: 'Classic Burger', price: 12.99, description: 'Juicy beef patty with fresh vegetables', available: true },
+                    { id: 2, name: 'Cheese Burger', price: 14.99, description: 'Double cheese with special sauce', available: true },
+                    { id: 3, name: 'Veggie Burger', price: 11.99, description: 'Plant-based patty with all toppings', available: false }
+                ]},
+                { id: 2, name: 'Pizza Express', category: 'pizza', cuisine: 'Italian', rating: 4.6, deliveryTime: '30-40 min', price: '$$', image: 'https://via.placeholder.com/300x200/4ECDC4/FFFFFF?text=Pizza+Express', products: [
+                    { id: 4, name: 'Margherita Pizza', price: 16.99, description: 'Fresh mozzarella, basil, tomato', available: true },
+                    { id: 5, name: 'Pepperoni Pizza', price: 18.99, description: 'Double pepperoni with extra cheese', available: true }
+                ]},
+                { id: 3, name: 'Sushi Master', category: 'asian', cuisine: 'Japanese', rating: 4.9, deliveryTime: '35-45 min', price: '$$$', image: 'https://via.placeholder.com/300x200/45B7D1/FFFFFF?text=Sushi+Master', products: [
+                    { id: 6, name: 'California Roll', price: 12.99, description: 'Crab, avocado, cucumber', available: true },
+                    { id: 7, name: 'Salmon Roll', price: 14.99, description: 'Fresh salmon with cream cheese', available: true }
+                ]},
+                { id: 4, name: 'Taco Fiesta', category: 'mexican', cuisine: 'Mexican', rating: 4.7, deliveryTime: '20-30 min', price: '$', image: 'https://via.placeholder.com/300x200/F39C12/FFFFFF?text=Taco+Fiesta', products: [
+                    { id: 8, name: 'Beef Tacos', price: 10.99, description: 'Seasoned beef with fresh salsa', available: true },
+                    { id: 9, name: 'Chicken Tacos', price: 9.99, description: 'Grilled chicken with guacamole', available: true }
+                ]},
+                { id: 5, name: 'Green Salad', category: 'healthy', cuisine: 'Healthy', rating: 4.5, deliveryTime: '15-25 min', price: '$', image: 'https://via.placeholder.com/300x200/27AE60/FFFFFF?text=Green+Salad', products: [
+                    { id: 10, name: 'Caesar Salad', price: 8.99, description: 'Romaine lettuce, parmesan, croutons', available: true },
+                    { id: 11, name: 'Greek Salad', price: 9.99, description: 'Feta cheese, olives, cucumber', available: true }
+                ]},
+                { id: 6, name: 'Sweet Dreams', category: 'desserts', cuisine: 'Desserts', rating: 4.8, deliveryTime: '20-30 min', price: '$$', image: 'https://via.placeholder.com/300x200/E91E63/FFFFFF?text=Sweet+Dreams', products: [
+                    { id: 12, name: 'Chocolate Cake', price: 6.99, description: 'Rich chocolate with vanilla frosting', available: true },
+                    { id: 13, name: 'Ice Cream Sundae', price: 4.99, description: 'Three scoops with toppings', available: true }
+                ]}
+            ],
+            cart: [],
+            user: null,
+            userLocation: '',
+            currentView: 'home',
+            notifications: []
+        };
 
-        // Shopping cart
-        let cart = [];
-        let userLocation = '';
-
-        // Initialize the page
+        // Initialize app
         document.addEventListener('DOMContentLoaded', function() {
-            displayRestaurants(restaurants);
+            console.log('QuickDeliver Multi-Vendor Platform Initialized');
+            displayRestaurants(appData.restaurants);
             setupSearch();
+            setupEventListeners();
+            loadUserFromStorage();
+            updateCartCount();
         });
 
-        // Page navigation
-        function showHomePage() {
+        // Page Navigation
+        function showPage(pageId) {
             hideAllPages();
-            document.getElementById('homePage').classList.remove('hidden');
+            document.getElementById(pageId).classList.remove('hidden');
+            appData.currentView = pageId;
         }
 
         function hideAllPages() {
             document.querySelectorAll('.page').forEach(page => page.classList.add('hidden'));
         }
 
-        // Display restaurants
+        function showHomePage() { showPage('homePage'); }
+        function showVendorPortal() { showPage('vendorPortal'); }
+        function showDriverPortal() { showPage('driverPortal'); }
+        function showAdminPanel() { showPage('adminPanel'); }
+        function showSignIn() { showPage('signInPage'); }
+
+        // Restaurant Display and Filtering
         function displayRestaurants(restaurantList) {
             const grid = document.getElementById('restaurantGrid');
+            if (!grid) return;
+            
             grid.innerHTML = restaurantList.map(restaurant => `
-                <div onclick="showRestaurantDetails(${restaurant.id})" class="cursor-pointer hover:shadow-lg transition-shadow rounded-lg overflow-hidden border border-gray-200">
+                <div onclick="showRestaurantMenu(${restaurant.id})" class="cursor-pointer hover:shadow-lg transition-all duration-300 rounded-lg overflow-hidden border border-gray-200">
                     <img src="${restaurant.image}" alt="${restaurant.name}" class="w-full h-48 object-cover">
                     <div class="p-4">
                         <div class="flex justify-between items-start mb-2">
                             <h4 class="font-semibold text-lg">${restaurant.name}</h4>
                             <span class="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-full">${restaurant.cuisine}</span>
                         </div>
-                        <div class="flex items-center justify-between text-sm text-gray-600">
+                        <div class="flex items-center justify-between text-sm text-gray-600 mb-2">
                             <div class="flex items-center">
                                 <i class="fas fa-star text-yellow-400 mr-1"></i>
                                 <span>${restaurant.rating}</span>
@@ -414,45 +1239,137 @@
                                 <span>${restaurant.deliveryTime}</span>
                             </div>
                         </div>
-                        <div class="mt-2">
+                        <div class="flex justify-between items-center">
                             <span class="text-green-600 font-semibold">${restaurant.price}</span>
+                            <span class="text-sm text-gray-600">${restaurant.products.length} items</span>
                         </div>
                     </div>
                 </div>
             `).join('');
         }
 
-        // Search functionality
         function setupSearch() {
             const searchInput = document.getElementById('searchInput');
+            const searchResults = document.getElementById('searchResults');
+            
             searchInput.addEventListener('input', function(e) {
                 const query = e.target.value.toLowerCase();
-                const filtered = restaurants.filter(restaurant => 
+                if (query.length < 2) {
+                    searchResults.classList.add('hidden');
+                    return;
+                }
+                
+                const filtered = appData.restaurants.filter(restaurant => 
                     restaurant.name.toLowerCase().includes(query) ||
-                    restaurant.cuisine.toLowerCase().includes(query)
+                    restaurant.cuisine.toLowerCase().includes(query) ||
+                    restaurant.category.toLowerCase().includes(query)
                 );
-                displayRestaurants(filtered);
+                
+                if (filtered.length > 0) {
+                    searchResults.innerHTML = '<div class="p-4 text-gray-500">No restaurants found</div>';
+                } else {
+                    searchResults.innerHTML = filtered.map(restaurant => `
+                        <div onclick="showRestaurantMenu(${restaurant.id})" class="p-3 hover:bg-gray-50 cursor-pointer">
+                            <div class="flex items-center">
+                                <img src="${restaurant.image}" alt="${restaurant.name}" class="w-12 h-12 rounded-full mr-3">
+                                <div>
+                                    <p class="font-medium">${restaurant.name}</p>
+                                    <p class="text-sm text-gray-600">${restaurant.cuisine} • ${restaurant.rating} ⭐</p>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+                searchResults.classList.remove('hidden');
+            });
+
+            searchInput.addEventListener('blur', function() {
+                setTimeout(() => searchResults.classList.add('hidden'), 200);
             });
         }
 
-        // Filter by category
         function filterByCategory(category) {
-            const filtered = restaurants.filter(restaurant => restaurant.category === category);
+            const filtered = appData.restaurants.filter(restaurant => restaurant.category === category);
             displayRestaurants(filtered);
+            showNotification(`Showing ${filtered.length} ${category} restaurants`);
         }
 
-        // Show all restaurants
+        function sortRestaurants() {
+            const sortBy = document.getElementById('sortBy').value;
+            let sorted = [...appData.restaurants];
+            
+            switch(sortBy) {
+                case 'rating':
+                    sorted.sort((a, b) => b.rating - a.rating);
+                    break;
+                case 'deliveryTime':
+                    sorted.sort((a, b) => parseInt(a.deliveryTime) - parseInt(b.deliveryTime));
+                    break;
+                case 'price':
+                    sorted.sort((a, b) => a.price.localeCompare(b.price));
+                    break;
+                case 'name':
+                    sorted.sort((a, b) => a.name.localeCompare(b.name));
+                    break;
+            }
+            
+            displayRestaurants(sorted);
+        }
+
         function showAllRestaurants() {
-            displayRestaurants(restaurants);
+            displayRestaurants(appData.restaurants);
         }
 
-        // Show restaurant details
-        function showRestaurantDetails(restaurantId) {
-            const restaurant = restaurants.find(r => r.id === restaurantId);
-            addToCart({ name: restaurant.name, price: 15.99 }); // Add sample item to cart
+        function loadMoreRestaurants() {
+            showNotification('Loading more restaurants...');
+            setTimeout(() => {
+                showNotification('All restaurants loaded');
+            }, 1000);
         }
 
-        // Location functions
+        function showRestaurantMenu(restaurantId) {
+            const restaurant = appData.restaurants.find(r => r.id === restaurantId);
+            if (restaurant) {
+                // Show restaurant menu modal
+                showRestaurantMenuModal(restaurant);
+            }
+        }
+
+        function showRestaurantMenuModal(restaurant) {
+            // Create modal with restaurant products
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-50 z-50 modal-backdrop';
+            modal.innerHTML = `
+                <div class="flex items-center justify-center h-full">
+                    <div class="bg-white rounded-lg p-6 max-w-4xl w-full mx-4 max-h-screen overflow-y-auto fade-in">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-xl font-bold">${restaurant.name}</h3>
+                            <button onclick="this.parentElement.parentElement.parentElement.remove()" class="text-gray-500 hover:text-gray-700">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            ${restaurant.products.map(product => `
+                                <div class="border border-gray-200 rounded-lg p-4 hover:shadow-lg transition-shadow">
+                                    <img src="https://via.placeholder.com/200x150/4ECDC4/FFFFFF?text=${product.name}" alt="${product.name}" class="w-full h-32 object-cover rounded mb-3">
+                                    <h4 class="font-semibold mb-2">${product.name}</h4>
+                                    <p class="text-sm text-gray-600 mb-3">${product.description}</p>
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-lg font-bold text-green-600">$${product.price}</span>
+                                        <button onclick="addToCart({name: '${product.name}', price: ${product.price}, restaurant: '${restaurant.name}'}); this.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.remove();" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                                            Add to Cart
+                                        </button>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        // Location Functions
         function showLocationModal() {
             document.getElementById('locationModal').classList.remove('hidden');
         }
@@ -466,49 +1383,34 @@
                 navigator.geolocation.getCurrentPosition(function(position) {
                     const latitude = position.coords.latitude;
                     const longitude = position.coords.longitude;
-                    document.getElementById('addressInput').value = `Lat: ${latitude}, Lon: ${longitude}`;
+                    const addressInput = document.getElementById('addressInput');
+                    if (addressInput) {
+                        addressInput.value = `Lat: ${latitude}, Lon: ${longitude}`;
+                        showNotification('Location detected successfully!');
+                    }
+                }, function(error) {
+                    showNotification('Unable to get your location. Please enter address manually.');
                 });
             } else {
-                alert('Geolocation is not supported by this browser.');
+                showNotification('Geolocation is not supported by this browser.');
             }
         }
 
         function saveLocation() {
             const address = document.getElementById('addressInput').value;
+            const apartment = document.getElementById('apartmentInput').value;
+            const instructions = document.getElementById('deliveryInstructions').value;
+            
             if (address) {
-                userLocation = address;
+                appData.userLocation = `${address}${apartment ? ', ' + apartment : ''}${instructions ? ' - ' + instructions : ''}`;
                 document.getElementById('locationText').textContent = address.substring(0, 15) + '...';
                 hideLocationModal();
+                showNotification('Location saved successfully!');
+                saveUserToStorage();
             }
         }
 
-        // Vendor Portal
-        function showVendorPortal() {
-            hideAllPages();
-            document.getElementById('vendorPortal').classList.remove('hidden');
-        }
-
-        // Sign In functions
-        function showSignIn() {
-            hideAllPages();
-            document.getElementById('signInPage').classList.remove('hidden');
-        }
-
-        function showSignUp() {
-            alert('Sign up functionality would be implemented here with registration form.');
-        }
-
-        function handleSignIn(event) {
-            event.preventDefault();
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            
-            // Simulate successful login
-            alert(`Welcome back! Signed in as ${email}`);
-            showHomePage();
-        }
-
-        // Shopping cart functions
+        // Shopping Cart Functions
         function showCart() {
             document.getElementById('cartModal').classList.remove('hidden');
             updateCartDisplay();
@@ -519,66 +1421,412 @@
         }
 
         function addToCart(item) {
-            cart.push(item);
+            appData.cart.push(item);
             updateCartCount();
-            alert(`${item.name} added to cart!`);
+            saveUserToStorage();
+            showNotification(`${item.name} added to cart!`);
+        }
+
+        function removeFromCart(index) {
+            appData.cart.splice(index, 1);
+            updateCartCount();
+            updateCartDisplay();
+            saveUserToStorage();
+            showNotification('Item removed from cart');
         }
 
         function updateCartCount() {
-            document.getElementById('cartCount').textContent = cart.length;
+            const cartCount = document.getElementById('cartCount');
+            if (cartCount) cartCount.textContent = appData.cart.length;
         }
 
         function updateCartDisplay() {
             const cartItems = document.getElementById('cartItems');
+            const cartSubtotal = document.getElementById('cartSubtotal');
+            const cartDelivery = document.getElementById('cartDelivery');
+            const cartTax = document.getElementById('cartTax');
             const cartTotal = document.getElementById('cartTotal');
             
-            if (cart.length === 0) {
-                cartItems.innerHTML = '<p class="text-gray-500">Your cart is empty</p>';
-                cartTotal.textContent = '$0.00';
+            if (!cartItems || appData.cart.length === 0) {
+                cartItems.innerHTML = '<p class="text-gray-500 text-center py-8">Your cart is empty</p>';
+                cartSubtotal.textContent = '$0.00';
+                cartDelivery.textContent = '$2.99';
+                cartTax.textContent = '$0.00';
+                cartTotal.textContent = '$2.99';
                 return;
             }
 
-            cartItems.innerHTML = cart.map((item, index) => `
-                <div class="flex justify-between items-center">
-                    <span>${item.name}</span>
-                    <span>$${item.price}</span>
+            cartItems.innerHTML = appData.cart.map((item, index) => `
+                <div class="flex justify-between items-center py-3 border-b">
+                    <div class="flex-1">
+                        <p class="font-medium">${item.name}</p>
+                        <p class="text-sm text-gray-600">${item.restaurant || ''}</p>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="font-semibold">$${item.price}</span>
+                        <button onclick="removeFromCart(${index})" class="text-red-600 hover:text-red-800">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
                 </div>
             `).join('');
 
-            const total = cart.reduce((sum, item) => sum + item.price, 0);
+            const subtotal = appData.cart.reduce((sum, item) => sum + item.price, 0);
+            const delivery = 2.99;
+            const tax = subtotal * 0.08;
+            const total = subtotal + delivery + tax;
+
+            cartSubtotal.textContent = `$${subtotal.toFixed(2)}`;
+            cartDelivery.textContent = `$${delivery.toFixed(2)}`;
+            cartTax.textContent = `$${tax.toFixed(2)}`;
             cartTotal.textContent = `$${total.toFixed(2)}`;
         }
 
         function checkout() {
-            if (cart.length === 0) {
-                alert('Your cart is empty!');
+            if (appData.cart.length === 0) {
+                showNotification('Your cart is empty!');
                 return;
             }
-            alert('Order placed successfully! This would connect to payment processing.');
-            cart = [];
-            updateCartCount();
+            if (!appData.user) {
+                showNotification('Please sign in to checkout');
+                showSignIn();
+                return;
+            }
             hideCart();
+            showNotification('Order placed successfully! Order #' + Math.floor(Math.random() * 10000));
+            appData.cart = [];
+            updateCartCount();
+            saveUserToStorage();
         }
 
-        // Other functions
+        // Authentication Functions
+        function handleSignIn(event) {
+            event.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            // Simulate authentication
+            appData.user = {
+                email: email,
+                name: email.split('@')[0],
+                role: 'customer',
+                id: Date.now()
+            };
+            
+            saveUserToStorage();
+            updateUserSection();
+            showNotification(`Welcome back, ${appData.user.name}!`);
+            showHomePage();
+        }
+
+        function signInWithGoogle() {
+            showNotification('Google sign-in would be implemented here');
+            // Simulate successful login
+            appData.user = {
+                email: 'user@gmail.com',
+                name: 'Google User',
+                role: 'customer',
+                id: Date.now()
+            };
+            saveUserToStorage();
+            updateUserSection();
+            showNotification('Signed in with Google!');
+            showHomePage();
+        }
+
+        function signInWithFacebook() {
+            showNotification('Facebook sign-in would be implemented here');
+            // Simulate successful login
+            appData.user = {
+                email: 'user@facebook.com',
+                name: 'Facebook User',
+                role: 'customer',
+                id: Date.now()
+            };
+            saveUserToStorage();
+            updateUserSection();
+            showNotification('Signed in with Facebook!');
+            showHomePage();
+        }
+
+        function showSignUp() {
+            showNotification('Sign up form would be implemented here');
+        }
+
+        function showForgotPassword() {
+            showNotification('Password reset would be implemented here');
+        }
+
+        function updateUserSection() {
+            const userSection = document.getElementById('userSection');
+            if (appData.user && userSection) {
+                userSection.innerHTML = `
+                    <div class="flex items-center space-x-2">
+                        <div class="flex items-center px-3 py-2 text-gray-700">
+                            <i class="fas fa-user mr-2"></i>
+                            <span>${appData.user.name}</span>
+                        </div>
+                        <button onclick="showCart()" class="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                            <i class="fas fa-shopping-cart mr-2"></i>
+                            Cart <span class="ml-1 bg-white text-green-600 rounded-full px-2 py-1 text-xs">${appData.cart.length}</span>
+                        </button>
+                        <button onclick="signOut()" class="flex items-center px-3 py-2 text-gray-700 hover:text-green-600">
+                            <i class="fas fa-sign-out-alt mr-2"></i>
+                            Sign Out
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        function signOut() {
+            appData.user = null;
+            appData.cart = [];
+            localStorage.removeItem('quickDeliverUser');
+            localStorage.removeItem('quickDeliverCart');
+            location.reload();
+        }
+
+        // Vendor Functions
+        function showVendorTab(tabName) {
+            // Hide all vendor tabs
+            document.querySelectorAll('.vendor-tab-content').forEach(tab => tab.classList.add('hidden'));
+            // Remove active state from all tabs
+            document.querySelectorAll('.vendor-tab').forEach(tab => {
+                tab.classList.remove('border-green-500', 'text-green-600');
+                tab.classList.add('border-transparent', 'text-gray-500');
+            });
+            
+            // Show selected tab
+            const selectedTab = document.getElementById(tabName + 'Tab');
+            if (selectedTab) {
+                selectedTab.classList.remove('hidden');
+            }
+            
+            // Add active state to clicked tab
+            event.target.classList.remove('border-transparent', 'text-gray-500');
+            event.target.classList.add('border-green-500', 'text-green-600');
+        }
+
+        function updateOrderStatus(orderId, status) {
+            showNotification(`Order #${orderId} marked as ${status}`);
+        }
+
+        function viewOrderDetails(orderId) {
+            showNotification(`Viewing details for Order #${orderId}`);
+        }
+
+        function showAddProductModal() {
+            document.getElementById('addProductModal').classList.remove('hidden');
+        }
+
+        function hideAddProductModal() {
+            document.getElementById('addProductModal').classList.add('hidden');
+        }
+
+        function addNewProduct(event) {
+            event.preventDefault();
+            const product = {
+                id: Date.now(),
+                name: document.getElementById('productName').value,
+                price: parseFloat(document.getElementById('productPrice').value),
+                category: document.getElementById('productCategory').value,
+                description: document.getElementById('productDescription').value,
+                image: document.getElementById('productImage').value,
+                available: document.getElementById('productAvailable').checked
+            };
+            
+            showNotification(`Product "${product.name}" added successfully!`);
+            hideAddProductModal();
+            // Reset form
+            event.target.reset();
+        }
+
+        function editProduct(productId) {
+            showNotification(`Editing product #${productId}`);
+        }
+
+        function toggleProductAvailability(productId) {
+            showNotification(`Toggled availability for product #${productId}`);
+        }
+
+        function saveVendorSettings() {
+            showNotification('Vendor settings saved successfully!');
+        }
+
+        // Driver Functions
+        function showDriverTab(tabName) {
+            // Hide all driver tabs
+            document.querySelectorAll('.driver-tab-content').forEach(tab => tab.classList.add('hidden'));
+            // Remove active state from all tabs
+            document.querySelectorAll('.driver-tab').forEach(tab => {
+                tab.classList.remove('border-green-500', 'text-green-600');
+                tab.classList.add('border-transparent', 'text-gray-500');
+            });
+            
+            // Show selected tab
+            const selectedTab = document.getElementById(tabName + 'Tab');
+            if (selectedTab) {
+                selectedTab.classList.remove('hidden');
+            }
+            
+            // Add active state to clicked tab
+            event.target.classList.remove('border-transparent', 'text-gray-500');
+            event.target.classList.add('border-green-500', 'text-green-600');
+        }
+
+        function acceptOrder(orderId) {
+            showNotification(`Order #${orderId} accepted! Navigate to pickup location.`);
+        }
+
+        function viewOrderOnMap(orderId) {
+            showNotification(`Opening map for Order #${orderId}`);
+        }
+
+        function updateDeliveryStatus(status) {
+            showNotification(`Delivery status updated to: ${status}`);
+        }
+
+        function contactCustomer() {
+            showNotification('Contacting customer...');
+        }
+
+        // Admin Functions
+        function showAdminTab(tabName) {
+            // Hide all admin tabs
+            document.querySelectorAll('.admin-tab-content').forEach(tab => tab.classList.add('hidden'));
+            // Remove active state from all tabs
+            document.querySelectorAll('.admin-tab').forEach(tab => {
+                tab.classList.remove('border-green-500', 'text-green-600');
+                tab.classList.add('border-transparent', 'text-gray-500');
+            });
+            
+            // Show selected tab
+            const selectedTab = document.getElementById(tabName + 'Tab');
+            if (selectedTab) {
+                selectedTab.classList.remove('hidden');
+            }
+            
+            // Add active state to clicked tab
+            event.target.classList.remove('border-transparent', 'text-gray-500');
+            event.target.classList.add('border-green-500', 'text-green-600');
+        }
+
+        function editUser(userId) {
+            showNotification(`Editing user #${userId}`);
+        }
+
+        function suspendUser(userId) {
+            showNotification(`User #${userId} suspended`);
+        }
+
+        function viewVendorDetails(vendorId) {
+            showNotification(`Viewing details for vendor #${vendorId}`);
+        }
+
+        function editVendor(vendorId) {
+            showNotification(`Editing vendor #${vendorId}`);
+        }
+
+        function suspendVendor(vendorId) {
+            showNotification(`Vendor #${vendorId} suspended`);
+        }
+
+        function exportVendorData() {
+            showNotification('Exporting vendor data...');
+        }
+
+        function saveAdminSettings() {
+            showNotification('Admin settings saved successfully!');
+        }
+
+        // Notification System
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.className = `notification p-4 rounded-lg shadow-lg ${
+                type === 'success' ? 'bg-green-100 text-green-800 border-green-200' :
+                type === 'error' ? 'bg-red-100 text-red-800 border-red-200' :
+                type === 'warning' ? 'bg-yellow-100 text-yellow-800 border-yellow-200' :
+                'bg-blue-100 text-blue-800 border-blue-200'
+            }`;
+            notification.innerHTML = `
+                <div class="flex items-center">
+                    <i class="fas ${
+                        type === 'success' ? 'fa-check-circle' :
+                        type === 'error' ? 'fa-exclamation-circle' :
+                        type === 'warning' ? 'fa-exclamation-triangle' :
+                        'fa-info-circle'
+                    } mr-2"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            const container = document.getElementById('notificationContainer');
+            container.appendChild(notification);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                notification.remove();
+            }, 5000);
+        }
+
+        // Storage Functions
+        function saveUserToStorage() {
+            localStorage.setItem('quickDeliverUser', JSON.stringify(appData.user));
+            localStorage.setItem('quickDeliverCart', JSON.stringify(appData.cart));
+            localStorage.setItem('quickDeliverLocation', appData.userLocation);
+        }
+
+        function loadUserFromStorage() {
+            const savedUser = localStorage.getItem('quickDeliverUser');
+            const savedCart = localStorage.getItem('quickDeliverCart');
+            const savedLocation = localStorage.getItem('quickDeliverLocation');
+            
+            if (savedUser) {
+                appData.user = JSON.parse(savedUser);
+                updateUserSection();
+            }
+            
+            if (savedCart) {
+                appData.cart = JSON.parse(savedCart);
+                updateCartCount();
+            }
+            
+            if (savedLocation) {
+                appData.userLocation = savedLocation;
+                document.getElementById('locationText').textContent = savedLocation.substring(0, 15) + '...';
+            }
+        }
+
+        // Event Listeners
+        function setupEventListeners() {
+            // Close modals on escape key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    hideLocationModal();
+                    hideCart();
+                    const addProductModal = document.getElementById('addProductModal');
+                    if (addProductModal && !addProductModal.classList.contains('hidden')) {
+                        hideAddProductModal();
+                    }
+                }
+            });
+            
+            // Close modals on backdrop click
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('modal-backdrop')) {
+                    e.target.remove();
+                }
+            });
+        }
+
+        // Utility Functions
         function showRestaurants() {
             document.getElementById('restaurantGrid').scrollIntoView({ behavior: 'smooth' });
         }
 
         function showVendorSignup() {
-            alert('Vendor signup form would be implemented here with business registration.');
-        }
-
-        function showAddProduct() {
-            alert('Add product form would be implemented here for vendors to add menu items.');
-        }
-
-        function showOrders() {
-            alert('Orders page would show all customer orders with status tracking.');
-        }
-
-        function showAnalytics() {
-            alert('Analytics dashboard would show sales data, customer insights, and performance metrics.');
+            showNotification('Vendor signup form would be implemented here');
         }
     </script>
 </body>
